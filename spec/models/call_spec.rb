@@ -108,7 +108,7 @@ RSpec.describe Call, type: :model do
       older = create(:call, started_at: 2.hours.ago)
       newer = create(:call, started_at: 1.minute.ago)
 
-      expect(Call.by_recency.to_a).to eq([newer, older])
+      expect(Call.by_recency.to_a).to eq([ newer, older ])
     end
   end
 

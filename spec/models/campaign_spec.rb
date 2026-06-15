@@ -6,7 +6,7 @@ RSpec.describe Campaign, type: :model do
       b = create(:campaign, name: "Beta")
       a = create(:campaign, name: "Alpha")
 
-      expect(Campaign.alphabetical.to_a).to eq([a, b])
+      expect(Campaign.alphabetical.to_a).to eq([ a, b ])
     end
 
     it '.random returns all campaigns' do

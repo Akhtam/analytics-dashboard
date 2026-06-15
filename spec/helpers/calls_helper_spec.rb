@@ -10,11 +10,11 @@ RSpec.describe CallsHelper, type: :helper do
       # Volume keyed by plain Time (as the DB returns); timeline uses TimeWithZone
       # to exercise the epoch-based key matching.
       volume = {
-        [t0, "converted"] => 2,
-        [t0, "connected"] => 1,
-        [t1, "missed"] => 3
+        [ t0, "converted" ] => 2,
+        [ t0, "connected" ] => 1,
+        [ t1, "missed" ] => 3
       }
-      timeline = [t0.in_time_zone, t1.in_time_zone, empty.in_time_zone]
+      timeline = [ t0.in_time_zone, t1.in_time_zone, empty.in_time_zone ]
 
       result = helper.volume_buckets(volume, timeline)
 
@@ -32,7 +32,7 @@ RSpec.describe CallsHelper, type: :helper do
       alpha = row_class.new("Alpha", "google_ads", "4", "1") # 25%
       beta  = row_class.new("Beta", "facebook", "2", "2")    # 100%
 
-      result = helper.conversion_rows([alpha, beta])
+      result = helper.conversion_rows([ alpha, beta ])
 
       expect(result.map { |r| r[:name] }).to eq(%w[Beta Alpha])
       expect(result.first).to include(name: "Beta", source: "facebook", total: 2, converted: 2, rate: 100)
@@ -40,7 +40,7 @@ RSpec.describe CallsHelper, type: :helper do
     end
 
     it "returns a rate of 0 when total is zero" do
-      result = helper.conversion_rows([row_class.new("X", "s", "0", "0")])
+      result = helper.conversion_rows([ row_class.new("X", "s", "0", "0") ])
 
       expect(result.first[:rate]).to eq(0)
     end
