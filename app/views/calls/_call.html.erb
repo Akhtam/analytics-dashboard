@@ -1,0 +1,7 @@
+<tr id="<%= dom_id(call) %>" class="<%= "fresh" if local_assigns[:fresh] %>">
+  <td><%= relative_time(call.started_at) %></td>
+  <td><%= call.call_number %></td>
+  <td><%= call.campaign.name %> <small style="color:#9AA7B5"><%= call.campaign.source %></small></td>
+  <td><span class="badge <%= call.status %>"><%= call.status.capitalize %></span></td>
+  <td class="dur"><%= format_duration(call.duration_seconds) %></td>
+</tr>

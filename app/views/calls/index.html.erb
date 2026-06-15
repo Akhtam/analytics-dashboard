@@ -1,0 +1,119 @@
+<% buckets = volume_buckets(@volume, @volume_timeline) %>
+<% max_volume = [buckets.map { |b| b[:total] }.max || 0, 1].max %>
+<% rows = conversion_rows(@by_campaign) %>
+
+<div class="dash">
+  <h1>Call Analytics</h1>
+  <div class="sub">Inbound performance</div>
+
+  <%= form_with url: root_path, method: :get,
+        data: { controller: "auto-submit", action: "change->auto-submit#submit",
+                turbo_frame: "dashboard", turbo_action: "advance" } do %>
+    <div class="filters">
+      <div class="field">
+        <label for="range">Date range</label>
+        <%= select_tag :range,
+              options_for_select([["Last 7 days", CallsFilter::LAST_7D], ["Last 24 hours", CallsFilter::LAST_24H]], range) %>
+      </div>
+      <div class="field">
+        <label for="campaign">Campaign</label>
+        <%= select_tag :campaign,
+              options_for_select([["All campaigns", "all"]] + @campaigns.map { |c| [c.name, c.id] }, params[:campaign] || "all") %>
+      </div>
+      <div class="field">
+        <label for="outcome">Outcome</label>
+        <%= select_tag :outcome,
+              options_for_select([["All outcomes", "all"], ["Converted", "converted"], ["Connected", "connected"], ["Missed", "missed"]], params[:outcome] || "all") %>
+      </div>
+    </div>
+
+    <%= turbo_frame_tag "dashboard" do %>
+    <div class="kpi">
+      <div class="label">Total calls</div>
+      <div class="val"><%= number_with_delimiter(@total) %></div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-head">
+          <h2>Call volume</h2>
+          <div class="vol-controls">
+            <% if granularity == CallStats::HOURLY && range == CallsFilter::LAST_7D %>
+              <% day_options = (0..6).map { |i| d = Time.zone.today - i; [i.zero? ? "Today" : d.strftime("%a, %b %-d"), d.iso8601] } %>
+              <%= select_tag :day, options_for_select(day_options, params[:day].presence || Time.zone.today.iso8601), class: "day-pick" %>
+            <% end %>
+            <div class="seg">
+              <% [["Daily", CallStats::DAILY], ["Hourly", CallStats::HOURLY]].each do |label, value| %>
+                <label class="<%= "on" if granularity == value %>">
+                  <%= radio_button_tag :granularity, value, granularity == value %><%= label %>
+                </label>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <% if buckets.any? { |bucket| bucket[:total].positive? } %>
+          <div class="vol">
+            <% buckets.each do |bucket| %>
+              <div class="col" title="<%= bucket[:total] %> calls">
+                <div class="stack" style="height: <%= (bucket[:total] * 100.0 / max_volume).round(2) %>%">
+                  <% %i[converted connected missed].each do |status| %>
+                    <% next if bucket[:total].zero? || bucket[status].zero? %>
+                    <div class="seg-bar <%= status %>" style="height: <%= (bucket[status] * 100.0 / bucket[:total]).round(2) %>%"></div>
+                  <% end %>
+                </div>
+                <div class="x"><%= volume_axis_label(bucket[:time], granularity) %></div>
+              </div>
+            <% end %>
+          </div>
+          <div class="legend">
+            <span><i class="sw converted"></i>Converted</span>
+            <span><i class="sw connected"></i>Connected</span>
+            <span><i class="sw missed"></i>Missed</span>
+          </div>
+        <% else %>
+          <div class="empty">No calls in this range.</div>
+        <% end %>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Conversion by campaign</h2>
+          <span class="hint">converted ÷ total</span>
+        </div>
+        <% if rows.any? %>
+          <% rows.each do |row| %>
+            <div class="camp-row">
+              <div class="top">
+                <span class="name"><%= row[:name] %> <small><%= row[:source] %></small></span>
+                <span class="pct"><%= row[:rate] %>%</span>
+              </div>
+              <div class="track"><div class="fill" style="width: <%= row[:rate] %>%"></div></div>
+              <div class="meta"><%= row[:converted] %> converted / <%= row[:total] %> calls</div>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="empty">No data for this selection.</div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card" data-controller="live-feed" data-live-feed-url-value="<%= simulate_calls_path %>">
+      <%= turbo_stream_from "calls" %>
+      <div class="card-head">
+        <h2>Recent calls</h2>
+        <button type="button" class="live-btn" data-live-feed-target="button" data-action="live-feed#toggle">▶ Go live</button>
+      </div>
+      <table class="feed">
+        <thead>
+          <tr><th>Time</th><th>Caller</th><th>Campaign</th><th>Status</th><th style="text-align:right">Duration</th></tr>
+        </thead>
+        <tbody id="recent_calls">
+          <%= render @recent %>
+          <tr class="feed-empty"><td colspan="5">No calls match these filters.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <% end %>
+  <% end %>
+</div>

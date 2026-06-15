@@ -8,3 +8,85 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* ---------- Call Analytics dashboard ---------- */
+.dash { max-width: 1180px; margin: 0 auto; padding: 24px; font-family: system-ui, -apple-system, sans-serif; color: #15202E; }
+.dash h1 { font-size: 21px; margin: 0 0 4px; }
+.dash .sub { color: #66758A; font-size: 13px; margin-bottom: 20px; }
+
+.filters { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; background: #fff; border: 1px solid #E5EAEF; border-radius: 12px; padding: 16px; margin-bottom: 18px; }
+.filters .field { display: flex; flex-direction: column; gap: 6px; }
+.filters label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #9AA7B5; }
+.filters select { padding: 8px 12px; border: 1px solid #D6DDE5; border-radius: 8px; font-size: 14px; }
+
+.kpi { display: inline-block; background: #fff; border: 1px solid #E5EAEF; border-radius: 12px; padding: 16px 20px; margin-bottom: 18px; min-width: 220px; }
+.kpi .label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #9AA7B5; }
+.kpi .val { font-size: 30px; font-weight: 700; margin-top: 8px; font-variant-numeric: tabular-nums; }
+
+.grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; margin-bottom: 18px; }
+.card { background: #fff; border: 1px solid #E5EAEF; border-radius: 12px; padding: 18px 20px; }
+.card h2 { font-size: 15px; margin: 0 0 16px; }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.card-head h2 { margin: 0; }
+.card-head .hint { font-size: 12px; color: #9AA7B5; }
+
+.vol-controls { display: flex; align-items: center; gap: 10px; }
+.day-pick { padding: 6px 10px; border: 1px solid #D6DDE5; border-radius: 8px; font-size: 13px; background: #fff; }
+.seg { display: inline-flex; background: #EEF1F4; border-radius: 8px; padding: 3px; }
+.seg label { font-size: 12px; font-weight: 600; color: #66758A; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
+.seg label.on { background: #fff; color: #15202E; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.seg input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.vol { display: flex; align-items: flex-end; gap: 7px; height: 196px; }
+.vol .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 8px; }
+.vol .stack { width: 100%; max-width: 38px; display: flex; flex-direction: column; justify-content: flex-end; border-radius: 5px 5px 0 0; overflow: hidden; }
+.vol .seg-bar { width: 100%; }
+.seg-bar.converted, .sw.converted { background: #16996A; }
+.seg-bar.connected, .sw.connected { background: #3A6FF0; }
+.seg-bar.missed, .sw.missed { background: #DC4F66; }
+.vol .x { font-size: 10px; color: #9AA7B5; height: 14px; line-height: 14px; }
+
+.legend { display: flex; gap: 16px; margin-top: 14px; font-size: 12px; color: #66758A; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+.camp-row { margin-bottom: 14px; }
+.camp-row .top { display: flex; justify-content: space-between; }
+.camp-row .name small { color: #9AA7B5; margin-left: 6px; }
+.camp-row .pct { font-weight: 600; }
+.camp-row .track { height: 9px; background: #EEF1F4; border-radius: 6px; overflow: hidden; margin: 6px 0 4px; }
+.camp-row .fill { height: 100%; background: #16996A; }
+.camp-row .meta { font-size: 11px; color: #9AA7B5; }
+
+table.feed { width: 100%; border-collapse: collapse; }
+table.feed th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #9AA7B5; padding-bottom: 10px; border-bottom: 1px solid #E5EAEF; }
+table.feed td { padding: 11px 0; border-bottom: 1px solid #E5EAEF; font-size: 13px; }
+table.feed td.dur { text-align: right; color: #66758A; }
+
+.badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+.badge.converted { color: #16996A; background: #E3F4EC; }
+.badge.connected { color: #3A6FF0; background: #E7EEFD; }
+.badge.missed { color: #DC4F66; background: #FBE7EB; }
+
+.empty { text-align: center; color: #9AA7B5; padding: 34px 0; }
+
+.live-btn { font-size: 12px; font-weight: 600; color: #0E7C7B; background: #E1F0EF; border: 0; border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.live-btn:hover { background: #d3e9e8; }
+
+/* Cap the live feed at 12 visible rows (newest first; live-prepended rows push older ones out). */
+#recent_calls tr:nth-child(n+13) { display: none; }
+
+/* Empty state lives as a row so it auto-hides the moment a live row is prepended. */
+#recent_calls .feed-empty { display: none; }
+#recent_calls .feed-empty:only-child { display: table-row; }
+#recent_calls .feed-empty td { text-align: center; color: #9AA7B5; padding: 34px 0; }
+
+/* Flash newly streamed rows. */
+@keyframes feed-flash { from { background: #E1F0EF; } to { background: transparent; } }
+.feed tr.fresh td { animation: feed-flash 1s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .feed tr.fresh td { animation: none; }
+}
+
+@media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
