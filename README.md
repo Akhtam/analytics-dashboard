@@ -139,13 +139,11 @@ A single Rails app (server-rendered + Hotwire) backed by PostgreSQL, with query 
 
 ### Key trade-offs
 - **Single full-stack app instead of an API-only backend + separate frontend.** Faster to build and cohesive for a demo; less suited to multiple client types.
-- **Read-time aggregation** (compute volume/conversion on every request) rather than precomputed rollups. Fine at demo scale with the `started_at` index; doesn't scale to millions of calls.
 - **Filters via Turbo Frame (server round-trip)** instead of client-side recompute — single source of truth in Ruby, at the cost of a (cheap, indexed) query per change.
 - **Live feed via an in-process simulator + ActionCable `async`** (no Redis). Works in one process, but broadcasts are unfiltered and the feed isn't trimmed server-side.
 - **Simplified data layer** — `status` is an integer enum on `Call` rather than a separate status/outcome model.
 
 ### What I'd do differently with more time
-- **Precomputed rollups** (hourly per-campaign/status counters or a materialized view, incremented on call creation) so reads are O(buckets) — the main scalability fix — plus a `(campaign_id, started_at)` composite index and time-partitioning at large volume.
 - **Real ingestion**: a telephony webhook/API (idempotent) replacing the simulator.
 - **Per-filter live updates** (scoped streams), server-side feed trimming, and pagination.
 - **Data-integrity safeguards**: `dependent:`/FK `on_delete` for campaign→calls, and `Call` validations + DB CHECK constraints (`ended_at >= started_at`, non-negative duration).
